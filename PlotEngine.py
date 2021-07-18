@@ -14,6 +14,8 @@ lines = []
 tkEButtons = []
 tkOButtons = []
 gridY = 1;
+nlEButton = "" #New Line Entry Button
+tkAddNLE = "" #New line Entry Entry
 
 curfile = "";
 
@@ -38,6 +40,7 @@ def ReadFile(filename):
 def ShowLines():
     global gridY
     gridY = 1;
+    firstBracket = True
     for l in lines:
         l = l.strip() #remove newlines
         if l[0] != '[':
@@ -45,6 +48,10 @@ def ShowLines():
             tkL.grid(row = gridY, column = 0)
             tkLabels.append(tkL)
         else: #Add options
+            if firstBracket: #Show the button for adding new text
+                ShowNewLineButton()
+                firstBracket = False
+                gridY += 50 #this is a band-aid more than anything
             AddOptionButton(l[1:len(l) - 1])
 
         gridY += 1
@@ -77,6 +84,24 @@ def AddOptionButton(txt):
     tkOEdit.grid(row = gridY, column = 1)
     gridY+=1
 
+#txt = string to go into the new line
+def NewLineButton(txt):
+    newRow = nlEButton.grid_info()["row"]
+    tkL = Label(root, text = txt)
+    tkL.grid(row = newRow, column = 0)
+    tkLabels.append(tkL)
+    tkEdit = Button(root, text="Edit", command = lambda:EditLine(tkL, tkEdit))
+    tkEdit.grid(row = newRow, column = 1)
+    tkAddNLE.grid(row = newRow+1)
+    nlEButton.grid(row = newRow+1)
+
+def ShowNewLineButton():
+    global gridY, nlEButton, tkAddNLE
+    tkAddNLE = Entry(root)
+    tkAddNLE.grid(row = gridY, column = 0) #Place this real low, may want to change this later
+    nlEButton = Button(root, text="Add new line", command=lambda:NewLineButton(tkAddNLE.get()))
+    nlEButton.grid(row = gridY, column = 1)
+    gridY += 1
 
 def ShowAddButton():
     tkAddOE = Entry(root)
@@ -135,4 +160,22 @@ def OpenNew(nextF):
 
 
 ReadFile("newFile")
+
+import win32gui
+
+def DRAW_LINE(x1, y1, x2, y2):
+    hwnd=win32gui.WindowFromPoint((x1,y1))
+    hdc=win32gui.GetDC(hwnd)
+    x1c,y1c=win32gui.ScreenToClient(hwnd,(x1,y1))
+    x2c,y2c=win32gui.ScreenToClient(hwnd,(x2,y2))
+    win32gui.MoveToEx(hdc,x1c,y1c)
+    win32gui.LineTo(hdc,x2c,y2c)
+    win32gui.ReleaseDC(hwnd,hdc)
+
+x1 = 640
+y1 = 400
+x2 = 840
+y2 = 600
+
+DRAW_LINE(x1, y1, x2, y2)
 
